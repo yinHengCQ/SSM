@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/context 
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd" default-lazy-init="true">
+       
+       <!-- 代表你要在Servlce 手动使用   @Transactional 事务 -->
+       <context:annotation-config></context:annotation-config>
+       
+       
+       <!--1、扫描包(dao和service包给Spring管理) --> 
+       <context:component-scan base-package="com.web.mapper,com.web.service"></context:component-scan>
+       
+       <!-- 2、配置数据连接池 c3po -->
+       <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://localhost:3306/weixin"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="root"></property>
+		 <!-- 连接池的属性 -->
+		 <property name="initialSize" value="5" />
+		<property name="maxActive" value="20" />
+		<property name="minIdle" value="3" />		 
+		<property name="maxIdle" value="50" />
+	</bean>
+       
+       
+      <!-- 3、定义SessionFactory -->
+       <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> 
+           <property name="dataSource" ref="dataSource"></property>
+            <!-- 扫描sql配置文件:mapper需要的xml文件 -->
+            <property name="mapperLocations" value="classpath:mapper/*.xml" />
+            
+            <!-- 配置MyBaties全局配置文件:mybatis-config.xml -->            
+		    <property name="configLocation" value="classpath:mybatis-config.xml" />
+		    
+		    <!-- 扫描entity包 使用别名 -->
+		    <property name="typeAliasesPackage" value="com.web.entity" />
+      </bean>
+      
+    
+     <!-- 对所有的Mapper映射，自动注入sqlSessionFactory -->
+       <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		    <!-- 注入sqlSessionFactory -->
+		    <property name="sqlSessionFactoryBeanName" value="sessionFactory" />
+		    <!-- 给出需要扫描Dao接口包 -->
+		    <property name="basePackage" value="com.web.mapper" />
+	  </bean>
+  
+    
+    <!-- 4、配置事务 -->
+   
+     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean> 
+     
+	
+	
+	
+	
+	<!-- 5、定义事务advice -->
+     <tx:advice id="myAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+             <!-- 对你的哪些方法做哪些事务 -->
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="execute*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="find*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="get*" propagation="REQUIRED"  read-only="true" />
+            <tx:method name="*" propagation="REQUIRED"  read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+       
+   <!-- 6、aop切面配置 --> 
+    <aop:config proxy-target-class="true"> 
+       <aop:pointcut expression="execution(* com.web.service..*(..))" id="myPointCut" />    
+       <aop:advisor advice-ref="myAdvice" pointcut-ref="myPointCut"/>
+    </aop:config>    
+     
+       
+       
+</beans>

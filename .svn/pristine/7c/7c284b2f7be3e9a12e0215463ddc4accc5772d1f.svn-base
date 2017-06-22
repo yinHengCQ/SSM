@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 这个xml的里面所有的操作，都是要对这个 Mapper 接口进行定义 -->
+<mapper namespace="com.web.mapper.ReplyNewsMapper">
+	<resultMap id="BaseResultMap" type="com.web.entity.ReplyNews">
+		<id column="replyNewsId" jdbcType="INTEGER" property="replyNewsId" />
+		<result column="replyNewsTitle" jdbcType="VARCHAR" property="replyNewsTitle" />
+		<result column="replyDecription" jdbcType="VARCHAR" property="replyDecription" />
+		<result column="replyImageUrl" jdbcType="VARCHAR" property="replyImageUrl" />
+		<result column="replyUrl" jdbcType="VARCHAR" property="replyUrl" />
+		<association property="reply" column="replyId" select="selectReply" javaType="com.web.entity.Reply">
+		</association>		
+	</resultMap>
+
+	<select id="selectReply" resultType="com.web.entity.Reply">
+		select * from reply where replyId=#{replyId}
+	</select>
+
+    <!-- 标准带条件的查询，通用标签 ，不要动它-->
+	<sql id="where_Clause">
+		<where>
+		   <!--mybatis 循环遍历标签  -->
+			<foreach collection="searchCriteriaList" item="c" separator="or">
+			    <!-- 如果有条件 -->
+				<if test="c.valid">
+				
+					<trim prefix="(" prefixOverrides="and" suffix=")">
+					
+						<foreach collection="c.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach   collection="criterion.value" item="listItem"
+										open="(" separator=","  close=")">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+
+
+
+
+     <!-- 新增 -->
+     <insert id="insert" parameterType="com.web.entity.ReplyNews" useGeneratedKeys="true" keyProperty="replyNewsId">
+	insert into replyNews (replyNewsTitle, replyDecription, replyImageUrl,
+	replyUrl, replyId)
+	values ( #{replyNewsTitle,jdbcType=VARCHAR},#{replyDecription,jdbcType=VARCHAR},
+	#{replyImageUrl,jdbcType=VARCHAR}, #{replyUrl,jdbcType=VARCHAR},#{replyId,jdbcType=INTEGER})
+  </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.web.entity.ReplyNews">
+    update replyNews
+    set replyNewsTitle = #{replyNewsTitle,jdbcType=VARCHAR},
+      replyDecription = #{replyDecription,jdbcType=VARCHAR},
+      replyImageUrl = #{replyImageUrl,jdbcType=VARCHAR},
+      replyUrl = #{replyUrl,jdbcType=VARCHAR},
+      replyId = #{replyId,jdbcType=INTEGER}
+    where replyNewsId = #{replyNewsId,jdbcType=INTEGER}
+  </update>
+  
+  
+  <!-- 分页查询 -->
+	<select id="searchPaging" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from replyNews 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if> 
+		
+		<!-- 如果有分页，不要动它 -->
+		<if test="limit != null">
+	      <if test="offset != null">
+	        limit ${offset}, ${limit}
+	      </if>
+	      <if test="offset == null">
+	        limit ${limit}
+	      </if>
+	    </if>	
+	</select>
+	
+    <select id="searchPagingCount" parameterType="com.web.criterion.CriteriaBuilder"  resultType="int">
+	    select count(*) from replyNews 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if>  
+	</select>
+	
+   
+     <!-- 通用查询，适合任意的条件 -->
+	<select id="search" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from replyNews 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if>  
+	 
+	</select>
+   
+      
+  
+  
+</mapper>  

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 这个xml的里面所有的操作，都是要对这个 Mapper 接口进行定义 -->
+<mapper namespace="com.web.mapper.CategoryMapper">
+	<resultMap id="BaseResultMap" type="com.web.entity.Category">
+		<id column="cateId" jdbcType="INTEGER" property="cateId" />
+		<result column="cateName" jdbcType="VARCHAR" property="cateName" />
+		<result column="cateImage" jdbcType="VARCHAR" property="cateImage" />
+		<result column="cateUrl" jdbcType="VARCHAR" property="cateUrl" />
+		<result column="cateSort" jdbcType="INTEGER" property="cateSort" />
+		<association property="userWeiXin" column="userWeiXinId" select="selectUserWeiXin" javaType="com.web.entity.UserWeiXin">
+		</association>		
+	</resultMap>
+	
+	
+	<select id="selectUserWeiXin" resultType="com.web.entity.UserWeiXin">
+		select * from userweixin where userWeiXinId=#{userWeiXinId}
+	</select>
+
+
+    <!-- 标准带条件的查询，通用标签 ，不要动它-->
+	<sql id="where_Clause">
+		<where>
+		   <!--mybatis 循环遍历标签  -->
+			<foreach collection="searchCriteriaList" item="c" separator="or">
+			    <!-- 如果有条件 -->
+				<if test="c.valid">
+				
+					<trim prefix="(" prefixOverrides="and" suffix=")">
+					
+						<foreach collection="c.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach   collection="criterion.value" item="listItem"
+										open="(" separator=","  close=")">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+
+
+
+
+     <!-- 新增 -->
+     <insert id="insert" parameterType="com.web.entity.Category" useGeneratedKeys="true" keyProperty="cateId">
+	insert into category (cateName, cateImage, cateUrl,
+	cateSort, userWeiXinId)
+	values ( #{cateName,jdbcType=VARCHAR},#{cateImage,jdbcType=VARCHAR},
+	#{cateUrl,jdbcType=VARCHAR}, #{cateSort,jdbcType=INTEGER},#{userWeiXinId,jdbcType=INTEGER})
+  </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.web.entity.Category">
+    update category
+    set cateName = #{cateName,jdbcType=VARCHAR},
+      cateImage = #{cateImage,jdbcType=VARCHAR},
+      cateUrl = #{cateUrl,jdbcType=VARCHAR},
+      cateSort = #{cateSort,jdbcType=INTEGER},
+      userWeiXinId = #{userWeiXinId,jdbcType=INTEGER}
+    where cateId = #{cateId,jdbcType=INTEGER}
+  </update>
+  
+  <delete id="delete" parameterType="int">
+  	delete from category where cateId=#{id}
+  </delete>   
+  
+  <!-- 分页查询 -->
+	<select id="searchPaging" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from category 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if> 
+		
+		<!-- 如果有分页，不要动它 -->
+		<if test="limit != null">
+	      <if test="offset != null">
+	        limit ${offset}, ${limit}
+	      </if>
+	      <if test="offset == null">
+	        limit ${limit}
+	      </if>
+	    </if>	
+	</select>
+	
+    <select id="searchPagingCount" parameterType="com.web.criterion.CriteriaBuilder"  resultType="int">
+	    select count(*) from category 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if>  
+	</select>
+	
+   
+     <!-- 通用查询，适合任意的条件 -->
+	<select id="search" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from category 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if>  
+	 
+	</select>
+   
+  <select id="findById" parameterType="int" resultType="com.web.entity.Category">
+  	select * from category where cateId=#{id}
+  </select>      
+  
+  
+</mapper>  

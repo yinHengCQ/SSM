@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 这个xml的里面所有的操作，都是要对这个 Mapper 接口进行定义 -->
+<mapper namespace="com.web.mapper.SlideAdvsMapper">
+	<resultMap id="BaseResultMap" type="com.web.entity.SlideAdvs">
+		<id column="slideAdvsId" jdbcType="INTEGER" property="slideAdvsId" />
+		<result column="advsName" jdbcType="VARCHAR" property="advsName" />
+		<result column="advsImage" jdbcType="VARCHAR" property="advsImage" />
+		<result column="advsUrl" jdbcType="VARCHAR" property="advsUrl" />
+		<association property="userWeiXin" column="userWeiXinId" select="selectUserWeiXin" javaType="com.web.entity.UserWeiXin">
+		</association>		
+	</resultMap>
+	
+	
+	<select id="selectUserWeiXin" resultType="com.web.entity.UserWeiXin">
+		select * from userWeiXin where userWeiXinId=#{userWeiXinId}
+	</select>
+
+
+    <!-- 标准带条件的查询，通用标签 ，不要动它-->
+	<sql id="where_Clause">
+		<where>
+		   <!--mybatis 循环遍历标签  -->
+			<foreach collection="searchCriteriaList" item="c" separator="or">
+			    <!-- 如果有条件 -->
+				<if test="c.valid">
+				
+					<trim prefix="(" prefixOverrides="and" suffix=")">
+					
+						<foreach collection="c.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach   collection="criterion.value" item="listItem"
+										open="(" separator=","  close=")">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+
+
+
+
+     <!-- 新增 -->
+     <insert id="insert" parameterType="com.web.entity.SlideAdvs" useGeneratedKeys="true" keyProperty="slideAdvsId">
+	insert into slideAdvs (slideAdvsId, advsName, advsImage,advsUrl,userWeiXinId)
+	values (#{slideAdvsId,jdbcType=INTEGER}, #{advsName,jdbcType=VARCHAR},#{advsImage,jdbcType=VARCHAR},
+	#{advsUrl,jdbcType=VARCHAR},#{userWeiXinId,jdbcType=INTEGER})
+  </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.web.entity.SlideAdvs">
+    update slideAdvs
+    set wxId = #{advsName,jdbcType=VARCHAR},
+      wxHead = #{advsImage,jdbcType=VARCHAR},
+      qrCode = #{qrCode,jdbcType=VARCHAR},
+      wxName = #{advsUrl,jdbcType=VARCHAR},
+      wxCode = #{userWeiXinId,jdbcType=INTEGER}
+    where slideAdvsId = #{slideAdvsId,jdbcType=INTEGER}
+  </update>
+  
+  
+  <!-- 分页查询 -->
+	<select id="searchPaging" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from slideAdvs 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if> 
+		
+		<!-- 如果有分页，不要动它 -->
+		<if test="limit != null">
+	      <if test="offset != null">
+	        limit ${offset}, ${limit}
+	      </if>
+	      <if test="offset == null">
+	        limit ${limit}
+	      </if>
+	    </if>	
+	</select>
+	
+    <select id="searchPagingCount" parameterType="com.web.criterion.CriteriaBuilder"  resultType="int">
+	    select count(*) from slideAdvs 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if>  
+	</select>
+	
+   
+     <!-- 通用查询，适合任意的条件 -->
+	<select id="search" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from slideAdvs 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if>  
+	 
+	</select>
+   
+      
+  
+  
+</mapper>  

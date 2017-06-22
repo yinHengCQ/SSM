@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 这个xml的里面所有的操作，都是要对这个 Mapper 接口进行定义 -->
+<mapper namespace="com.web.mapper.UserWeiXinMapper">
+	<resultMap id="BaseResultMap" type="com.web.entity.UserWeiXin">
+		<id column="userWeiXinId" jdbcType="INTEGER" property="userWeiXinId" />
+		<result column="wxId" jdbcType="INTEGER" property="wxId" />
+		<result column="wxHead" jdbcType="VARCHAR" property="wxHead" />
+		<result column="qrCode" jdbcType="VARCHAR" property="qrCode" />
+		<result column="wxName" jdbcType="VARCHAR" property="wxName" />
+		<result column="wxCode" jdbcType="VARCHAR" property="wxCode" />
+		<result column="wxType" jdbcType="INTEGER" property="wxType" />
+		<result column="token" jdbcType="VARCHAR" property="token" />
+		<association property="userInfo" column="userId" select="selectUserInfo" javaType="com.web.entity.UserInfo" >		
+		</association>		
+	</resultMap>
+	
+	<!-- 子查询语句 -->
+	<select id="selectUserInfo" resultType="com.web.entity.UserInfo">
+		select * from userInfo where userId=#{userId}
+	</select>
+
+
+    <!-- 标准带条件的查询，通用标签 ，不要动它-->
+	<sql id="where_Clause">
+		<where>
+		   <!--mybatis 循环遍历标签  -->
+			<foreach collection="searchCriteriaList" item="c" separator="or">
+			    <!-- 如果有条件 -->
+				<if test="c.valid">
+				
+					<trim prefix="(" prefixOverrides="and" suffix=")">
+					
+						<foreach collection="c.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach   collection="criterion.value" item="listItem"
+										open="(" separator=","  close=")">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+
+
+
+
+     <!-- 新增 -->
+     <insert id="insert" parameterType="com.web.entity.UserWeiXin" useGeneratedKeys="true" keyProperty="userWeiXinId">
+	insert into userweixin (wxId,wxHead,qrCode,wxName,wxCode,
+	wxType,token,userId)
+	values (#{wxId,jdbcType=INTEGER},#{wxHead,jdbcType=VARCHAR},#{qrCode,jdbcType=VARCHAR},
+	#{wxName,jdbcType=VARCHAR},#{wxCode,jdbcType=VARCHAR},#{wxType,jdbcType=INTEGER},
+	#{token,jdbcType=VARCHAR},#{userId,jdbcType=INTEGER})
+  </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.web.entity.UserWeiXin">
+    update userweixin
+    set wxId = #{wxId,jdbcType=INTEGER},
+      wxHead = #{wxHead,jdbcType=VARCHAR},
+      qrCode = #{qrCode,jdbcType=VARCHAR},
+      wxName = #{wxName,jdbcType=VARCHAR},
+      wxCode = #{wxCode,jdbcType=VARCHAR},
+      wxType = #{wxType,jdbcType=INTEGER},
+      token = #{token,jdbcType=VARCHAR},
+      userId = #{userId,jdbcType=INTEGER}
+    where userWeiXinId = #{userWeiXinId,jdbcType=INTEGER}
+  </update>
+  
+  <delete id="delete" parameterType="int">
+  	delete from userweixin where userWeiXinId=#{id}
+  </delete>
+  
+  <select id="findById" parameterType="Integer" resultMap="BaseResultMap">
+  	select * from userweixin where userWeiXinId=#{id}
+  </select>
+  
+  <!-- 分页查询 -->
+	<select id="searchPaging" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from userweixin 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if> 
+		
+		<!-- 如果有分页，不要动它 -->
+		<if test="limit != null">
+	      <if test="offset != null">
+	        limit ${offset}, ${limit}
+	      </if>
+	      <if test="offset == null">
+	        limit ${limit}
+	      </if>
+	    </if>	
+	</select>
+	
+    <select id="searchPagingCount" parameterType="com.web.criterion.CriteriaBuilder"  resultType="int">
+	    select count(*) from userweixin 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if>  
+	</select>
+	
+   
+     <!-- 通用查询，适合任意的条件 -->
+	<select id="search" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from userweixin 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if>  
+	 
+	</select>
+   
+      
+  
+  
+</mapper>  

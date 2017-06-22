@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 这个xml的里面所有的操作，都是要对这个 Mapper 接口进行定义 -->
+<mapper namespace="com.web.mapper.UserInfoMapper">
+
+    <!-- 标准带条件的查询，通用标签 ，不要动它-->
+	<sql id="where_Clause">
+		<where>
+		   <!--mybatis 循环遍历标签  -->
+			<foreach collection="searchCriteriaList" item="c" separator="or">
+			    <!-- 如果有条件 -->
+				<if test="c.valid">
+				
+					<trim prefix="(" prefixOverrides="and" suffix=")">
+					
+						<foreach collection="c.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach   collection="criterion.value" item="listItem"
+										open="(" separator=","  close=")">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+
+
+
+	<resultMap id="BaseResultMap" type="com.web.entity.UserInfo">
+		<id column="userId" jdbcType="INTEGER" property="userId" />
+		<result column="loginName" jdbcType="VARCHAR" property="loginName" />
+		<result column="loginPwd" jdbcType="VARCHAR" property="loginPwd" />
+		<result column="state" jdbcType="INTEGER" property="state" />
+		<result column="regTime" jdbcType="DATE" property="regTime" />
+		<result column="endTime" jdbcType="DATE" property="endTime" />
+	</resultMap>
+
+
+     <!-- 新增 -->
+     <insert id="insert" parameterType="com.web.entity.UserInfo" useGeneratedKeys="true" keyProperty="userId">
+	insert into userinfo (userId, loginName, loginPwd,
+	state, regTime, endTime)
+	values (#{userId,jdbcType=INTEGER}, #{loginName,jdbcType=VARCHAR},
+	#{loginPwd,jdbcType=VARCHAR},
+	#{state,jdbcType=INTEGER}, #{regTime,jdbcType=DATE}, #{endTime,jdbcType=DATE})
+  </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.web.entity.UserInfo">
+    update userinfo
+    set loginName = #{loginName,jdbcType=VARCHAR},
+      loginPwd = #{loginPwd,jdbcType=VARCHAR},
+      state = #{state,jdbcType=INTEGER},
+      regTime = #{regTime,jdbcType=DATE},
+      endTime = #{endTime,jdbcType=DATE}
+    where userId = #{userId,jdbcType=INTEGER}
+  </update>
+  
+  
+  <!-- 分页查询 -->
+	<select id="searchPaging" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from userinfo 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if> 
+		
+		<!-- 如果有分页，不要动它 -->
+		<if test="limit != null">
+	      <if test="offset != null">
+	        limit ${offset}, ${limit}
+	      </if>
+	      <if test="offset == null">
+	        limit ${limit}
+	      </if>
+	    </if>	
+	</select>
+	
+    <select id="searchPagingCount" parameterType="com.web.criterion.CriteriaBuilder"  resultType="int">
+	    select count(*) from userinfo 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if>  
+	</select>
+	
+	 <!-- 更新密码 -->
+     <update id="loginPwd" >
+           update  userinfo  set loginPwd=#{0}  where userId=#{1}
+     </update>
+   
+     <!-- 通用查询，适合任意的条件 -->
+	<select id="search" parameterType="com.web.criterion.CriteriaBuilder"  resultMap="BaseResultMap">
+	    select * from userinfo 
+	    
+	      <!-- 如果参数不为空，不要动它 -->
+		  <if test="_parameter != null">
+             <include refid="where_Clause" />
+         </if> 
+    
+        <!-- 如果有排序条件， 不要动它 -->
+        <if test="orderByClause != null">
+		      order by ${orderByClause}
+		</if>  
+	 
+	</select>
+   
+    <select id="findById" parameterType="int" resultType="com.web.entity.UserInfo">
+    	select * from userinfo where userId=#{id}
+    </select>  
+  
+  
+</mapper>  

@@ -1,0 +1,7 @@
+package com.web.service;
+
+import com.web.entity.Article;
+
+public interface ArticleService extends CommonService<Article> {
+
+}

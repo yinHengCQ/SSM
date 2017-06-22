@@ -1,0 +1,61 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link href="${pageContext.request.contextPath }/css/bootstrap.css" rel="stylesheet">
+<script src="${pageContext.request.contextPath }/js/jquery.min.js"></script>
+<script src="${pageContext.request.contextPath }/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation"> 
+	    <div class="container-fluid"> 
+	    <div class="navbar-header" style="width: 200px"> 
+	        <label class="navbar-brand" >订单管理系统</label> 
+	    </div> 
+	    <div> 
+	        <ul class="nav navbar-nav"> 
+	            <li class="dropdown"> 
+	                <a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
+	                   	 资金管理 <b class="caret"></b> 
+	                </a> 
+	                <ul class="dropdown-menu"> 
+	                    <li><a href="${pageContext.request.contextPath }/money/showProduct.action">产品管理</a></li> 
+	                    <li><a href="${pageContext.request.contextPath }/money/showPublish.action">发布管理</a></li> 
+	                </ul> 
+	            </li> 
+	            <li class="dropdown"> 
+	                <a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
+	               		 统计管理 <b class="caret"></b> 
+	                </a> 
+	                <ul class="dropdown-menu"> 
+	                    <li><a href="${pageContext.request.contextPath }/statistics/showWorkload.action">工作量统计</a></li>
+	                    <li class="divider"></li> 
+	                    <li><a href="${pageContext.request.contextPath }/statistics/showAdEffectByOrderInfo.action">订单统计</a></li>
+	                </ul> 
+	            </li> 
+	            <li class="dropdown"> 
+	                <a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
+	               		 系统管理 <b class="caret"></b> 
+	                </a> 
+	                <ul class="dropdown-menu"> 
+	                    <li><a href="${pageContext.request.contextPath }/system/showLog.action">日志统计</a></li>
+	                </ul> 
+	            </li> 	            
+	        </ul> 
+	    </div> 
+	    	<label class="col-md-offset-7 col-md-3" style="position: fixed;">
+	    		你好！${sessionScope.userinfo.personName }
+		    	<a href="${pageContext.request.contextPath }/login.jsp">
+					<button type="button" class="btn btn-default navbar-btn">
+						换个账户
+		  			</button>
+				</a>
+			</label>	    
+	    </div> 
+	</nav>
+</body>
+</html>
